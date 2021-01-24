@@ -33,6 +33,7 @@ class TVDBClient:
             "search_series": "/search/series",
             "series": "/series/{id}",
             "series_episodes": "/series/{id}/episodes",
+            "series_episodes_summary": "/series/{id}/episodes/summary",
             "user": "/user",
         }
 
@@ -186,3 +187,20 @@ class TVDBClient:
                 )["data"]
             self._cache.set(key, data)
         return data
+
+    def get_seasons_by_series(
+        self,
+        tvdb_id: Union[str, int],
+        *,
+        refresh_cache: bool = False,
+        language: str = None,
+    ) -> dict:
+        """Get all the seasons for a TV series"""
+        key = f"get_seasons_by_series::tvdb_id:{tvdb_id}"
+        data = self._cache.get(key)
+        if data is None or refresh_cache:
+            url = self._urls["series_episodes_summary"].format(id=tvdb_id)
+            data = self._get(url, language=language)["data"]
+            self._cache.set(key, data)
+        return data
+    
